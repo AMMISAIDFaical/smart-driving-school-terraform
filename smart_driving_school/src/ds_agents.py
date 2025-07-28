@@ -123,7 +123,6 @@ def quiz_agent(state: State):
         "quiz_topics": quiz_topics  # Return updated list
     }
 
-
 def student_input_node(state: State) -> Command[Literal["quiz_agent"]]:
     """
     Captures the student's latest input and wraps it in a `HumanMessage` to be processed by agents.

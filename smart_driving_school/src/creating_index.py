@@ -18,8 +18,7 @@ from azure.search.documents.indexes.models import (
 )
 from azure.core.credentials import AzureKeyCredential
 import os
-# from dotenv import load_dotenv uncomment this line if you are using .env file
-
+from dotenv import load_dotenv 
 # Load environment variables
 load_dotenv(override=True)
 

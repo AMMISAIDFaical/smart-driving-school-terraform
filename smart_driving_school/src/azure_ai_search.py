@@ -1,11 +1,9 @@
 import os
 import azure.identity
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
 from azure.search.documents import SearchClient
 from langchain_openai import AzureOpenAIEmbeddings
 from azure.core.credentials import AzureKeyCredential
-from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 from typing import List, Dict
 
@@ -49,24 +47,18 @@ def get_embedding(text):
     embeddings = create_embeddings()
     return embeddings.embed_query(text)
 
-def create_llm():
-    return ChatOpenAI(
-        model="gpt-4o",
-        base_url="https://models.inference.ai.azure.com",
-        api_key=GITHUB_TOKEN
-    )
 
 def search_documents(search_query: str) -> List[Dict[str, str]]:
     """
     Search documents using indexed PDFs about driving lessons stored in Azure AI Search vector store.
     """
     search_client = SearchClient(SEARCH_SERVICE_ENDPOINT, SEARCH_SERVICE_INDEX_NAME, credential=credential)
-    search_vector = get_embedding(search_query)
+    # search_vector = get_embedding(search_query)
     
     results = search_client.search(
         search_text=search_query,
         top=5,
-        vector_queries=[VectorizedQuery(vector=search_vector, k_nearest_neighbors=5, fields="text_vector")]
+        # vector_queries=[VectorizedQuery(vector=search_vector, k_nearest_neighbors=5, fields="text_vector")]
     )
     
     output = []
@@ -79,3 +71,10 @@ def search_documents(search_query: str) -> List[Dict[str, str]]:
         })
     
     return output
+
+def main():
+    result = search_documents("alcahol and driving")
+    print(result)
+    
+if __name__ == "__main__":
+    main()
