@@ -39,3 +39,8 @@ variable "partition_count" {
     error_message = "The partition_count must be one of the following values: 1, 2, 3, 4, 6, 12."
   }
 }
+
+output "azurerm_search_service_primary_key" {
+  value     = azurerm_search_service.search.primary_key
+  sensitive = true
+}
