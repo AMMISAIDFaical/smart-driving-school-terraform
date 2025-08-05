@@ -1,5 +1,4 @@
 import os
-import azure.identity
 from dotenv import load_dotenv
 from azure.search.documents import SearchClient
 from langchain_openai import AzureOpenAIEmbeddings
@@ -17,14 +16,10 @@ AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 SEARCH_SERVICE_INDEX_NAME = os.getenv("SEARCH_SERVICE_INDEX_NAME")
 SEARCH_SERVICE_KEY = os.getenv("SEARCH_SERVICE_KEY")
-AZURE_TENANT_ID = os.getenv("AZURE_TENANT_ID")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-SEARCH_SERVICE_API_VERSION = '2023-10-01-Preview'
 
 # Azure credentials
 credential = AzureKeyCredential(SEARCH_SERVICE_KEY)
-azure_credential = azure.identity.AzureDeveloperCliCredential(tenant_id=AZURE_TENANT_ID)
-token_provider = azure.identity.get_bearer_token_provider(azure_credential, "https://cognitiveservices.azure.com/.default")
 
 # Azure AI Search headers
 HEADERS = {
@@ -46,7 +41,6 @@ def create_embeddings():
 def get_embedding(text):
     embeddings = create_embeddings()
     return embeddings.embed_query(text)
-
 
 def search_documents(search_query: str) -> List[Dict[str, str]]:
     """

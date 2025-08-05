@@ -18,11 +18,3 @@ output "AZURE_STORAGE_CONNECTION_STRING" {
 output "AZURE_CONTAINER_NAME" {
   value = azurerm_storage_container.drvschoolcontainer.name
 }
-
-output "AZURE_OPENAI_API_KEY" {
-  value = azurerm_cognitive_deployment.cd.model
-}
-
-output "AZURE_OPENAI_ENDPOINT" {
-  value = azurerm_cognitive_deployment.cd.model
-}
