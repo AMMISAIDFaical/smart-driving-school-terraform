@@ -1,74 +1,105 @@
 import os
-from dotenv import load_dotenv
-from azure.search.documents import SearchClient
-from langchain_openai import AzureOpenAIEmbeddings
-from azure.core.credentials import AzureKeyCredential
-from azure.search.documents.models import VectorizedQuery
+import logging
 from typing import List, Dict
 
-# Load environment variables
+from dotenv import load_dotenv
+from azure.core.credentials import AzureKeyCredential
+from azure.search.documents import SearchClient
+from azure.search.documents.models import VectorizedQuery
+from langchain_openai import AzureOpenAIEmbeddings
+
+# --------------------------
+# Logging Setup
+# --------------------------
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
+
+# --------------------------
+# Load Environment Variables
+# --------------------------
 load_dotenv(override=True)
 
-# Azure Search + OpenAI Config
 SEARCH_SERVICE_NAME = os.getenv("SEARCH_SERVICE_NAME")
 SEARCH_SERVICE_ENDPOINT = os.getenv("SEARCH_SERVICE_ENDPOINT")
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 SEARCH_SERVICE_INDEX_NAME = os.getenv("SEARCH_SERVICE_INDEX_NAME")
 SEARCH_SERVICE_KEY = os.getenv("SEARCH_SERVICE_KEY")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+AZURE_DEPLOYMENT = os.getenv("AZURE_DEPLOYMENT", "text-embedding-ada-002")
 
-# Azure credentials
+if not all([SEARCH_SERVICE_ENDPOINT, SEARCH_SERVICE_INDEX_NAME, SEARCH_SERVICE_KEY]):
+    logger.error("Missing one or more required Azure Search environment variables.")
+    raise ValueError("Environment configuration incomplete.")
+
+# --------------------------
+# Azure Credentials
+# --------------------------
 credential = AzureKeyCredential(SEARCH_SERVICE_KEY)
 
-# Azure AI Search headers
-HEADERS = {
-    'Content-Type': 'application/json',
-    'api-key': SEARCH_SERVICE_KEY
-}
-
-# === Embedding and LLM ===
-def create_embeddings():
+# --------------------------
+# Embedding Utilities
+# --------------------------
+def create_embeddings() -> AzureOpenAIEmbeddings:
     return AzureOpenAIEmbeddings(
         openai_api_key=AZURE_OPENAI_API_KEY,
         azure_endpoint=AZURE_OPENAI_ENDPOINT,
-        openai_api_type='azure',
-        azure_deployment='text-embedding-ada-002',
-        model="text-embedding-ada-002",
-        chunk_size=1
+        openai_api_type="azure",
+        azure_deployment=AZURE_DEPLOYMENT,
+        model=AZURE_DEPLOYMENT,
+        chunk_size=1,
     )
 
-def get_embedding(text):
+def get_embedding(text: str) -> List[float]:
     embeddings = create_embeddings()
     return embeddings.embed_query(text)
 
-def search_documents(search_query: str) -> List[Dict[str, str]]:
+# --------------------------
+# Search Function
+# --------------------------
+def search_documents(search_query: str, use_vector: bool = False) -> List[Dict[str, str]]:
     """
-    Search documents using indexed PDFs about driving lessons stored in Azure AI Search vector store.
+    Search documents in Azure AI Search.
+    :param search_query: The user query string
+    :param use_vector: Whether to use vector search or traditional full-text search
     """
-    search_client = SearchClient(SEARCH_SERVICE_ENDPOINT, SEARCH_SERVICE_INDEX_NAME, credential=credential)
-    # search_vector = get_embedding(search_query)
-    
-    results = search_client.search(
-        search_text=search_query,
-        top=5,
-        # vector_queries=[VectorizedQuery(vector=search_vector, k_nearest_neighbors=5, fields="text_vector")]
+    search_client = SearchClient(
+        endpoint=SEARCH_SERVICE_ENDPOINT,
+        index_name=SEARCH_SERVICE_INDEX_NAME,
+        credential=credential
     )
-    
-    output = []
-    for doc in results:
-        chunk = doc["chunk"].replace("\n", " ")[:200]
-        score = round(doc['@search.score'], 5)
-        output.append({
-            "score": score,
-            "content": chunk
-        })
-    
-    return output
+    search_vector = get_embedding(search_query)
 
-def main():
-    result = search_documents("alcahol and driving")
-    print(result)
-    
+    try:
+        results = search_client.search(
+                search_text=search_query,
+                top=5,
+
+            )
+
+        output = []
+        for doc in results:
+            chunk = doc.get("content", "")[:200].replace("\n", " ")
+            score = round(doc.get("@search.score", 0), 5)
+            output.append({
+                "score": score,
+                "content": chunk
+            })
+
+        return output
+
+    except Exception as e:
+        logger.exception("Error while searching documents")
+        return []
+
+# --------------------------
+# Main Entrypoint
+# --------------------------
+def main() -> None:
+    query = "alcohol and driving"
+    logger.info(f" Searching for: '{query}'")
+    results = search_documents(query, use_vector=False)  # Set to True if using vector search
+    for res in results:
+        logger.info(f"[Score: {res['score']}] {res['content']}")
+
 if __name__ == "__main__":
     main()
