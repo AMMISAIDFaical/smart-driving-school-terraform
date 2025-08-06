@@ -1,6 +1,5 @@
 import os
 from langchain_openai import ChatOpenAI
-from langchain_mistralai import ChatMistralAI
 import getpass
 import os
 

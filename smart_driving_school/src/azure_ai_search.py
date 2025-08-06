@@ -5,7 +5,6 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-from azure.search.documents.models import VectorizedQuery
 from langchain_openai import AzureOpenAIEmbeddings
 
 # --------------------------

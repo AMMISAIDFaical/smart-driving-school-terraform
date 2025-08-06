@@ -1,6 +1,5 @@
 import os
 import logging
-from typing import Optional
 from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import HttpResponseError
@@ -13,7 +12,6 @@ from azure.search.documents.indexes.models import (
     SearchableField,
     CorsOptions,
     SearchIndex,
-    InputFieldMappingEntry
 )
 
 # -------------------------
@@ -52,16 +50,6 @@ def create_index() -> SearchIndex:
         SimpleField(name="metadata_storage_path", type=SearchFieldDataType.String),
         SimpleField(name="keyPhrases", type=SearchFieldDataType.Collection(SearchFieldDataType.String), searchable=True, retrievable=True, filterable=True, facetable=True),
         SimpleField(name="mergedContent", type=SearchFieldDataType.String, searchable=True, retrievable=True),
-    #     SearchableField(
-    #     name="text_vector",
-    #     type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
-    #     searchable=True,
-    #     retrievable=True,
-    #     stored=True,
-    #     dimensions=1536,
-    #     vector_search_profile="vector-index-azureOpenAi-text-profile"
-    # )
-
     ]
 
     cors_options = CorsOptions(allowed_origins=["*"], max_age_in_seconds=60)
