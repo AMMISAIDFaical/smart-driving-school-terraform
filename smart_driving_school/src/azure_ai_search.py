@@ -94,7 +94,7 @@ def search_documents(search_query: str, use_vector: bool = False) -> List[Dict[s
 # Main Entrypoint
 # --------------------------
 def main() -> None:
-    query = "alcohol and driving"
+    query = "alcohol"
     logger.info(f" Searching for: '{query}'")
     results = search_documents(query, use_vector=False)  # Set to True if using vector search
     for res in results:
