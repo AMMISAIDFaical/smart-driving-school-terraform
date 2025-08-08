@@ -5,7 +5,8 @@
 .terraform.lock.hcl
 
 # Environments
-.env
+
+*.env
 .venv
 .env/
 .venv/
