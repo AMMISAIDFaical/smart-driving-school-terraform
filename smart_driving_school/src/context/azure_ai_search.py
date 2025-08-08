@@ -7,6 +7,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 from langchain_openai import AzureOpenAIEmbeddings
+from azure.search.documents.models import VectorizableTextQuery
 
 # --------------------------
 # Logging Setup
@@ -37,59 +38,29 @@ if not all([SEARCH_SERVICE_ENDPOINT, SEARCH_SERVICE_INDEX_NAME, SEARCH_SERVICE_K
 credential = AzureKeyCredential(SEARCH_SERVICE_KEY)
 
 # --------------------------
-# Embedding Utilities
-# --------------------------
-def create_embeddings() -> AzureOpenAIEmbeddings:
-    return AzureOpenAIEmbeddings(
-        openai_api_key=AZURE_OPENAI_API_KEY,
-        azure_endpoint=AZURE_OPENAI_ENDPOINT,
-        openai_api_type="azure",
-        azure_deployment=AZURE_DEPLOYMENT,
-        model=AZURE_DEPLOYMENT,
-        chunk_size=1,
-    )
-
-def get_embedding(text: str) -> List[float]:
-    embeddings = create_embeddings()
-    return embeddings.embed_query(text)
-
-# --------------------------
 # Search Function
 # --------------------------
-def search_documents(search_query: str, use_vector: bool = False) -> List[Dict[str, str]]:
+def search_documents(search_query: str) -> List[Dict[str, str]]:
     """
     Search documents in Azure AI Search.
     :param search_query: The user query string
-    :param use_vector: Whether to use vector search or traditional full-text search
     """
-    search_client = SearchClient(
-        endpoint=SEARCH_SERVICE_ENDPOINT,
-        index_name=SEARCH_SERVICE_INDEX_NAME,
-        credential=credential
-    )
-    search_vector = get_embedding(search_query)
+    search_client = SearchClient(endpoint=SEARCH_SERVICE_ENDPOINT, index_name=SEARCH_SERVICE_INDEX_NAME, credential=credential)
+    vector_query = VectorizableTextQuery(text=search_query, k_nearest_neighbors=1, fields="vector", exhaustive=True)
+    
+    results = search_client.search(  
+        search_text=search_query,  
+        vector_queries= [vector_query],
+        select=["parent_id", "chunk_id", "chunk"],
+        top=1
+    )  
+    
+    for result in results:  
+        print(f"parent_id: {result['parent_id']}")  
+        print(f"chunk_id: {result['chunk_id']}")  
+        print(f"Score: {result['@search.score']}")  
+        print(f"Content: {result['chunk']}")  
 
-    try:
-        results = search_client.search(
-                search_text=search_query,
-                top=5,
-
-            )
-
-        output = []
-        for doc in results:
-            chunk = doc.get("content", "")[:200].replace("\n", " ")
-            score = round(doc.get("@search.score", 0), 5)
-            output.append({
-                "score": score,
-                "content": chunk
-            })
-
-        return output
-
-    except Exception as e:
-        logger.exception("Error while searching documents")
-        return []
 
 # --------------------------
 # Main Entrypoint
@@ -97,7 +68,7 @@ def search_documents(search_query: str, use_vector: bool = False) -> List[Dict[s
 def main() -> None:
     query = "alcohol and driving"
     logger.info(f" Searching for: '{query}'")
-    results = search_documents(query, use_vector=False)  # Set to True if using vector search
+    results = search_documents(query)  # Set to True if using vector search
     for res in results:
         logger.info(f"[Score: {res['score']}] {res['content']}")
 
