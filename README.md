@@ -98,8 +98,4 @@ The `smart_driving_school/src/context/` folder contains scripts for managing Azu
    python smart_driving_school/src/graph.py
    ```
 
-<<<<<<< HEAD
    This will start a console application where you can interact with the driving school agents and test
-=======
-   This will start a console application where you can interact with the driving school agents and test
->>>>>>> d9c14f0 (readme)
