@@ -2,4 +2,8 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+<<<<<<< HEAD
 .terraform.lock.hcl
+=======
+.terraform.lock.hcl
+>>>>>>> d9c14f0 (readme)

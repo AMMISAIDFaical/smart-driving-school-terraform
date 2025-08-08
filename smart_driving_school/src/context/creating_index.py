@@ -92,3 +92,4 @@ def create_datasource() -> SearchIndexerDataSourceConnection:
         else:
             logger.exception("Failed to create or retrieve data source.")
             raise
+
