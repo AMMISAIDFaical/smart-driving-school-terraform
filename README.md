@@ -7,7 +7,7 @@ This project provides an AI-powered platform for driving school exam preparation
 ### 1. Clone the Repository
 
 ```sh
-git clone https://github.com/AMMISAIDFaical/smart-driving-school-project.git
+git clone <your-repo-url>
 cd smart-driving-school-project
 ```
 
@@ -46,8 +46,7 @@ terraform apply
 ````
 
 Once apply is complete verifie on the portal that all resources are created and get the needed paramaters for .env file population
-![Workflow Diagram](./smart_driving_school/artifact/created_resources_via_terraform_apply.png)
-
+![Workflow Diagram](smart_driving_school/artifact/created_resources_via_terraform_apply.png)
 
 
 ### 6. Working with the `context` Folder
