@@ -47,7 +47,7 @@ terraform apply
 
 Once apply is complete verifie on the portal that all resources are created and get the needed paramaters for .env file population
 ![Workflow Diagram](smart_driving_school/artifact/terminal_output_tf.png)
-![Workflow Diagram](/smart-driving-school-project/smart_driving_school/artifact/terminal_output_tf.png)
+![Workflow Diagram](smart_driving_school/artifact/created_resources_via_terraform_apply.png)
 
 
 ### 6. Working with the `context` Folder
