@@ -7,7 +7,7 @@ This project provides an AI-powered platform for driving school exam preparation
 ### 1. Clone the Repository
 
 ```sh
-git clone <your-repo-url>
+git clone https://github.com/AMMISAIDFaical/smart-driving-school-project.git
 cd smart-driving-school-project
 ```
 
